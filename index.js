@@ -17,6 +17,7 @@ app.use(
     },
     onProxyReq: (proxyReq, req, res) => {
       const authHeader = req.headers["authorization"];
+      console.log("Auth header reçu :", authHeader);
       if (authHeader) {
         proxyReq.setHeader("Authorization", authHeader);
       }
