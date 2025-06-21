@@ -1,34 +1,32 @@
 const express = require("express");
-const cors = require("cors");
-const { createProxyMiddleware } = require("http-proxy-middleware");
-
+const axios = require("axios");
 const app = express();
+const port = 10000;
 
-app.use(cors());
 app.use(express.json());
 
-app.use(
-  "/v1",
-  createProxyMiddleware({
-    target: "https://api.openai.com",
-    changeOrigin: true,
-    pathRewrite: {
-      "^/v1": "/v1",
-    },
-    onProxyReq: (proxyReq, req, res) => {
-      const authHeader = req.headers["authorization"];
-      console.log("Auth header reçu :", authHeader);
-      if (authHeader) {
-        proxyReq.setHeader("Authorization", authHeader);
-      }
-    },
-  })
-);
+const OPENAI_API_KEY = "sk-proj-n5RkSASQEwfKJH-WlPHtUX5ffmDS3Sy2zwKramMjeaxh9dKAuS-8sVGhQd9zvmM0Uc0y9q1o6T3RJLbKEJ8KNfiHYaSDu9RLz5u85QoWGmNeGG6DcHOvGpATvG9-wn1gKOmdtsOjWzcNKGSb6RMKQ80n8Y4A";
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Proxy listening on port ${PORT}`);
+app.post("/v1/chat/completions", async (req, res) => {
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      req.body,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        timeout: 10000,
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erreur OpenAI →", error?.response?.data || error.message);
+    res.status(500).send("Erreur proxy");
+  }
 });
-app.get('/', (req, res) => {
-  res.send('DzAssist Proxy fonctionne ✅');
+
+app.listen(port, () => {
+  console.log(`✅ Proxy prêt sur http://localhost:${port}`);
 });
