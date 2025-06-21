@@ -5,8 +5,7 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors()); // Autorise toutes les origines
+app.use(cors());
 app.use(express.json());
 
 app.post("/v1/chat/completions", async (req, res) => {
@@ -17,7 +16,7 @@ app.post("/v1/chat/completions", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // tu peux aussi mettre ta clé ici en dur pour tester
+          Authorization: "Bearer sk-proj-n5RkSASQEfWkJH-WlPHtUJ1gUoNBiLGuEsuFJz9Ub0qH0K08" // 🔐 Ta clé ici
         },
       }
     );
@@ -31,4 +30,5 @@ app.post("/v1/chat/completions", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`DzAssist proxy actif sur
+  console.log(`DzAssist proxy actif sur le port ${port}`);
+});
