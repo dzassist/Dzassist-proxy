@@ -1,10 +1,12 @@
 const express = require("express");
 const axios = require("axios");
+const cors = require("cors");
+
 const app = express();
-const port = 10000;
+const port = process.env.PORT || 3000;
 
-const OPENAI_API_KEY = "sk-proj-..."; // <- remplace ici ta vraie clé
-
+// Middleware
+app.use(cors()); // Autorise toutes les origines
 app.use(express.json());
 
 app.post("/v1/chat/completions", async (req, res) => {
@@ -15,18 +17,18 @@ app.post("/v1/chat/completions", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // tu peux aussi mettre ta clé ici en dur pour tester
         },
-        timeout: 10000,
       }
     );
     res.json(response.data);
   } catch (error) {
-    console.error("Erreur OpenAI →", error?.response?.data || error.message);
-    res.status(500).send("Erreur proxy");
+    console.error("Erreur proxy:", error.response?.data || error.message);
+    res.status(error.response?.status || 500).json({
+      error: error.response?.data || { message: "Erreur serveur proxy" },
+    });
   }
 });
 
 app.listen(port, () => {
-  console.log(`✅ Proxy prêt sur http://localhost:${port}`);
-});
+  console.log(`DzAssist proxy actif sur
