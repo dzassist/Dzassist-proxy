@@ -1,34 +1,39 @@
 const express = require("express");
-const axios = require("axios");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const { Configuration, OpenAIApi } = require("openai");
 
 const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-app.post("/v1/chat/completions", async (req, res) => {
+const configuration = new Configuration({
+  apiKey: "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",
+});
+
+const openai = new OpenAIApi(configuration);
+
+app.get("/", (req, res) => {
+  res.send("✅ DzAssist Proxy fonctionne");
+});
+
+app.post("/chat", async (req, res) => {
   try {
-    const response = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
-      req.body,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer sk-proj-n5RkSASQEfWkJH-WlPHtUJ1gUoNBiLGuEsuFJz9Ub0qH0K08" // 🔐 Ta clé ici
-        },
-      }
-    );
+    const { messages } = req.body;
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-4",
+      messages: messages,
+    });
+
     res.json(response.data);
   } catch (error) {
-    console.error("Erreur proxy:", error.response?.data || error.message);
-    res.status(error.response?.status || 500).json({
-      error: error.response?.data || { message: "Erreur serveur proxy" },
-    });
+    console.error("Erreur OpenAI :", error.response?.data || error.message);
+    res.status(500).json({ error: "Erreur lors de l’appel à l’API OpenAI." });
   }
 });
 
-app.listen(port, () => {
-  console.log(`DzAssist proxy actif sur le port ${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur lancé sur le port ${PORT}`);
 });
